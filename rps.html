@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Rock, Paper, Scissors</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css" integrity="sha384-PsH8R72JQ3SOdhVi3uxftmaW6Vc51MKb0q5P2rRUpPvrszuE4W1povHYgTpBfshb" crossorigin="anonymous">
+  </head>
+  <body>
+    <div id="scoreboard" class="jumbotron">
+      <h1>Press r, p or s to start playing!</h1>
+      <div class="card">
+        <div class="card-body">
+          <p class="card-text">You chose: <span id="user_move"></span> </p>
+          <p class="card-text">The PC chose: <span id="pc_move"></span> </p>
+          <p class="card-text">Wins: <span id="wins"></span> </p>
+          <p class="card-text">Losses: <span id="losses"></span> </p>
+          <p class="card-text">Ties: <span id="ties"></span> </p>
+          <a name="" id="reset_button" class="btn btn-warning" href="#" role="button" onclick="resetScore();">Reset Scores</a>
+        </div>
+      </div>
+    </div>
+
+<script>
+  var valid_keys = ["r", "p", "s"];
+
+  var empty_score = function () {
+    return {
+      user_last: null,
+      pc_last: null,
+      wins: 0,
+      losses: 0,
+      ties: 0,
+      win: function() { this.wins += 1 },
+      lose: function() { this.losses += 1 },
+      tie: function() { this.ties += 1 },
+      set_moves: function(user, pc) {
+        this.user_last = user;
+        this.pc_last = pc;
+      }
+    }
+  }
+
+  var scoring = empty_score();
+
+  document.onkeyup = function(event) {
+    var user_move = event.key;
+    console.log("Key Pressed: " + user_move) // debug for keystroke validation
+    if (is_valid_keystroke(valid_keys, user_move)) {
+      var pc_move = computer_move(valid_keys);
+      scoring = update_scoring(scoring, user_move, pc_move, move_verdict)
+      update_template(scoring)
+    }
+  }
+
+  var resetScore = function () {
+    scoring = empty_score()
+    update_template(scoring)
+  }
+
+  var is_valid_keystroke = function (valid_keystrokes, key) {
+    return valid_keystrokes.includes(key)
+  }
+
+  var computer_move = function (valid_moves) {
+    var random_index = Math.floor(Math.random() * valid_moves.length);
+    return valid_moves[random_index];
+  }
+
+  var move_verdict = function (user_move, pc_move) {
+    if (user_move === pc_move) return 0
+    var move_mapping = {"r": -1, "p": 0, "s": 1}
+    return move_mapping[user_move] - move_mapping[pc_move]
+  }
+
+  var update_state_for_verdict = function(state, verdict) {
+    switch (verdict) {
+      case -1:
+      case 2:
+        console.log("LOSE")
+        state.lose();
+        break;
+      case 1:
+      case -2:
+        console.log("WIN")
+        state.win();
+        break;
+      case 0:
+        console.log("TIE")
+        state.tie();
+        break;
+      default:
+        console.log("Error fell through case statement with verdict of " + verdict);
+    }
+    return state
+  }
+
+  var update_scoring = function (state, user_move, pc_move, verdict) {
+    var updated_state = Object.assign({}, state); // DONT EVAH MUTATE STATE!!!!1!
+    updated_state.set_moves(user_move, pc_move);
+    var scoring = update_state_for_verdict(updated_state, verdict(user_move, pc_move))
+    return scoring
+  }
+
+  var update_template = function (scoring) {
+    document.querySelector("#user_move").innerHTML = scoring.user_last
+    document.querySelector("#pc_move").innerHTML = scoring.pc_last
+    document.querySelector("#wins").innerHTML = scoring.wins
+    document.querySelector("#losses").innerHTML = scoring.losses
+    document.querySelector("#ties").innerHTML = scoring.ties
+  }
+  // var empty_score = function () {
+  //   return {
+  //     user_last: null,
+  //     pc_last: null,
+  //     wins: 0,
+  //     losses: 0,
+  //     ties: 0,
+  //     win: function() { this.wins += 1 },
+  //     lose: function() { this.losses += 1 },
+  //     tie: function() { this.ties += 1 },
+  //     set_moves: function(user, pc) {
+  //       this.user_last = user;
+  //       this.pc_last = pc;
+  //     }
+  //   }
+  // }
+  // <p>You chose: <span id="user_move"></span> </p>
+  // <p>The PC chose: <span id="pc_move"></span> </p>
+  // <p>Wins: <span id="wins"></span> </p>
+  // <p>Losses: <span id="losses"></span> </p>
+  // <p>Ties: <span id="ties"></span> </p>
+</script>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
+  </body>
+</html>
